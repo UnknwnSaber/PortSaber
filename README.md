@@ -1,70 +1,34 @@
-PortSaber
-PortSaber is a fast, user-friendly, and customizable port scanner written in Python. It efficiently scans TCP ports on a target IP address with concurrency and provides clear color-coded output. Scan reports are automatically saved with timestamped filenames in a dedicated results folder.
+# PortSaber
 
-Features
-Fast multi-threaded TCP port scanning using concurrent.futures.ThreadPoolExecutor
+**PortSaber** is a fast, user-friendly, and customizable TCP port scanner written in Python. It efficiently scans specified ports on target IP addresses or subnets using concurrency, provides clear color-coded terminal output, and automatically saves detailed scan reports. PortSaber also features basic service detection and banner grabbing for enhanced scan realism and insight.
 
-Colorized terminal output using colorama for easy identification of open/closed/error ports
+---
 
-Progress bar visualization with tqdm for scan progress tracking
+## Features
 
-Validates IP addresses and port ranges with user-friendly prompts if arguments are not provided
+- **Fast multi-threaded TCP port scanning** using `concurrent.futures.ThreadPoolExecutor`
+- **Service detection** by mapping open ports to common service names
+- **Basic banner grabbing** to retrieve service banners (e.g., HTTP, FTP, SMTP greetings)
+- **Color-coded terminal output** with `colorama` for easy identification:
+  - Green for open ports with detected services and banners
+  - Red for closed ports
+  - Yellow for errors or exceptions during scanning
+- **Scan progress bar** powered by `tqdm` for real-time progress visualization
+- **Support for scanning individual IPs or entire subnets (CIDR notation)**
+- **Customizable scan parameters** via command-line arguments or interactive prompts:
+  - Target IP or subnet
+  - Start and end ports
+  - Timeout per port connection attempt
+  - Delay between scans (to avoid detection or flooding)
+  - Output filename (optional)
+- **Automatic saving** of scan reports in a dedicated `portScanResults` folder, with concise timestamped filenames (`PS_Report_YYMMDD_HHMM.txt`)
+- **Graceful handling of interrupts (Ctrl+C)** to safely stop scans and save progress
 
-Command-line arguments support for IP, start/end ports, timeout, and output file saving
+---
 
-Automatically saves scan results in a portScanResults directory with concise, timestamped filenames
+## Installation
 
-Gracefully handles keyboard interrupts (Ctrl+C) to stop scans safely
+Make sure you have Python 3.x installed. Then, install dependencies via pip:
 
-Installation
-Ensure you have Python 3.x installed.
-
-Install required dependencies:
-
-bash
+```bash
 pip install colorama tqdm
-
-Usage
-You can run PortSaber interactively or use command-line arguments:
-
-bash
-python portSaber.py
-This will prompt you for the target IP and port range.
-
-Or provide arguments for quick scans:
-
-bash
-python portSaber.py -i 192.168.1.1 -s 1 -e 1024 -t 1.0 -o myscan.txt
-
-Arguments:
-Flag	Description	Default
--i, --ip	Target IP address	(prompt)
--s, --start	Start port	1
--e, --end	End port	1024
--t, --timeout	Timeout per port (seconds)	1.0
--o, --output	Output filename (optional)	Saves automatically in portScanResults folder with timestamped name if not specified
-
-Example Output
-Starting scan on 192.168.1.1 from port 1 to 1024...
-
-Scanning ports: 100%|██████████| 1024/1024 [00:30<00:00, 33.92port/s]
-
-========================================
-Scan complete. Open ports (3):
- - Port 22
- - Port 80
- - Port 443
-========================================
-
-Open ports saved to portScanResults/PS_Report_250527_1530.txt
-Folder Structure
-portScanResults/ — Automatically created folder where scan reports are saved
-
-portSaber.py — Main port scanner script
-
-Notes
-Only TCP ports are scanned.
-
-Ensure you have appropriate permissions and legal authorization before scanning remote systems.
-
-Large port ranges may take significant time depending on network speed and target response.
