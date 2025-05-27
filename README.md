@@ -1,34 +1,47 @@
-# PortSaber
+# PortSaber Changelog
 
-**PortSaber** is a fast, user-friendly, and customizable TCP port scanner written in Python. It efficiently scans specified ports on target IP addresses or subnets using concurrency, provides clear color-coded terminal output, and automatically saves detailed scan reports. PortSaber also features basic service detection and banner grabbing for enhanced scan realism and insight.
+## [1.0] - Initial Stable Release
+
+### Added
+- Core multi-threaded TCP port scanning functionality with configurable port ranges.
+- Support for scanning single IP addresses and entire subnets using CIDR notation (e.g., 192.168.1.0/24).
+- Service detection on open ports via `socket.getservbyport()` to identify common services.
+- Basic banner grabbing for open ports to capture service information.
+- Configurable scan timeout and delay between port scans for flexible scanning speed and stealth.
+- Colorized terminal output using `colorama` for clear distinction of open, closed, and error states.
+- Real-time progress display with `tqdm` progress bar for better user feedback.
+- Interactive input prompts when command-line arguments are omitted.
+- Automatic creation of a dedicated `portScanResults` folder to store scan reports.
+- Timestamped and concise report filenames for easy identification and management.
+- Command-line interface with support for IP/subnet, port range, timeout, delay, and output options.
+- Graceful handling of keyboard interrupts (Ctrl+C) to safely terminate scans without data loss.
+
+### Changed
+- Structured scanning logic to handle multiple hosts efficiently via multithreading.
+- Improved output formatting for readability and detailed reporting.
+
+### Fixed
+- Enhanced input validation for IP addresses, subnets, and port ranges to prevent invalid inputs.
+- Addressed concurrency and error handling to ensure stable scanning operations.
 
 ---
 
-## Features
+## Usage Commands
 
-- **Fast multi-threaded TCP port scanning** using `concurrent.futures.ThreadPoolExecutor`
-- **Service detection** by mapping open ports to common service names
-- **Basic banner grabbing** to retrieve service banners (e.g., HTTP, FTP, SMTP greetings)
-- **Color-coded terminal output** with `colorama` for easy identification:
-  - Green for open ports with detected services and banners
-  - Red for closed ports
-  - Yellow for errors or exceptions during scanning
-- **Scan progress bar** powered by `tqdm` for real-time progress visualization
-- **Support for scanning individual IPs or entire subnets (CIDR notation)**
-- **Customizable scan parameters** via command-line arguments or interactive prompts:
-  - Target IP or subnet
-  - Start and end ports
-  - Timeout per port connection attempt
-  - Delay between scans (to avoid detection or flooding)
-  - Output filename (optional)
-- **Automatic saving** of scan reports in a dedicated `portScanResults` folder, with concise timestamped filenames (`PS_Report_YYMMDD_HHMM.txt`)
-- **Graceful handling of interrupts (Ctrl+C)** to safely stop scans and save progress
+Run interactively (prompts for input):
+'''bash
+python portSaber.py
 
----
+Run with command-line arguments for quick scanning:
+'''bash
+python portSaber.py -i 192.168.1.1 -s 1 -e 1024 -t 1.0 -o myscan.txt
 
-## Installation
-
-Make sure you have Python 3.x installed. Then, install dependencies via pip:
-
-```bash
-pip install colorama tqdm
+##Available Arguments
+| Flag              | Description                        | Default                                                               |
+| ----------------- | ---------------------------------- | --------------------------------------------------------------------- |
+| `-i`, `--ip`      | Target IP address or subnet (CIDR) | Interactive prompt                                                    |
+| `-s`, `--start`   | Start port                         | 1                                                                     |
+| `-e`, `--end`     | End port                           | 1024                                                                  |
+| `-t`, `--timeout` | Timeout per port (seconds)         | 1.0                                                                   |
+| `-d`, `--delay`   | Delay between port scans (seconds) | 0.0                                                                   |
+| `-o`, `--output`  | Output filename (optional)         | Saves automatically in `portScanResults` folder with timestamped name |
