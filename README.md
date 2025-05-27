@@ -1,13 +1,18 @@
-Port Scanner App
-dev: UnknwnSaber
+⚔️ PortSaber - A Fast and Lightweight Python Port Scanner by UnknwnSaber
+PortSaber is a basic and efficient port scanning tool built with Python. Designed for speed and simplicity, it helps quickly identify open ports and potential vulnerabilities on target systems.
 
-General Information
-a port is a communication endpoint for a specific process or service. Ports are identified by a number, ranging from 0 to 65535. Common ports include:
+🔍 Key Features
+🔹Specify custom port ranges
+🔹Clear, color-coded CLI 
+🔹Minimal dependencies — easy to run and modify
 
-21: FTP (File Transfer Protocol)
-22: SSH (Secure Shell)
-80: HTTP (HyperText Transfer Protocol)
-443: HTTPS (HTTP Secure)
+⚙️ Requirements
+Python 3.x
+Standard Python libraries (socket, concurrent.futures)
 
-These ports allow different services to run simultaneously on a single IP address. A port scanner helps identify which ports are open and what services are running on them.
-[Source: https://toxigon.com/how-to-build-a-python-port-scanner]
+🚨 Disclaimer
+This tool is intended for educational purposes and authorized security testing only. Unauthorized scanning of networks is illegal and unethical.
+
+🧠 Created by UnknwnSaber
+Contributions, feedback, and pull requests are welcome!
+
