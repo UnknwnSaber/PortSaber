@@ -7,7 +7,7 @@ from tqdm import tqdm
 import sys
 import time
 from datetime import datetime
-import os  # <-- Added for folder creation
+import os
 
 init(autoreset=True)
 
@@ -17,6 +17,18 @@ def get_service_name(port):
     except OSError:
         return "Unknown"
 
+def grab_banner(ip, port, timeout=1):
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)
+        sock.connect((ip, port))
+        sock.send(b'\r\n')
+        banner = sock.recv(1024).decode(errors="ignore").strip()
+        sock.close()
+        return banner if banner else "No banner"
+    except:
+        return "No banner"
+
 def scan_port(ip, port, timeout=1):
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -25,14 +37,15 @@ def scan_port(ip, port, timeout=1):
         sock.close()
         if result == 0:
             service = get_service_name(port)
-            print(Fore.GREEN + f"Port {port} is OPEN ({service})")
-            return port, True, service
+            banner = grab_banner(ip, port, timeout)
+            print(Fore.GREEN + f"Port {port} is OPEN ({service}) - Banner: {banner}")
+            return port, True, service, banner
         else:
             print(Fore.RED + f"Port {port} is closed")
-            return port, False, None
+            return port, False, None, None
     except Exception as e:
         print(Fore.YELLOW + f"Error scanning port {port}: {e}")
-        return port, False, None
+        return port, False, None, None
 
 def scan_ports(ip, start_port, end_port, timeout=1, delay=0):
     ports = range(start_port, end_port + 1)
@@ -45,16 +58,16 @@ def scan_ports(ip, start_port, end_port, timeout=1, delay=0):
                 if delay > 0:
                     time.sleep(delay)
                 return result
-            
+
             results = list(tqdm(executor.map(delayed_scan, ports),
                                 total=len(ports), desc=f"Scanning {ip}", unit="port"))
     except KeyboardInterrupt:
         print(Fore.YELLOW + "\nScan interrupted by user. Exiting...")
         sys.exit()
 
-    for port, is_open, service in results:
+    for port, is_open, service, banner in results:
         if is_open:
-            open_ports_local.append((port, service))
+            open_ports_local.append((port, service, banner))
 
     return open_ports_local
 
@@ -88,7 +101,7 @@ def get_port(prompt, default):
         print(Fore.RED + "Invalid port number. Enter a number between 1 and 65535.")
 
 def main():
-    parser = argparse.ArgumentParser(description="PortSaber: A simple port scanner with enhanced features")
+    parser = argparse.ArgumentParser(description="PortSaber: A simple port scanner with banner grabbing")
     parser.add_argument("-i", "--ip", help="Target IP address or subnet in CIDR notation (e.g., 192.168.1.0/24)")
     parser.add_argument("-s", "--start", type=int, default=1, help="Start port (default 1)")
     parser.add_argument("-e", "--end", type=int, default=1024, help="End port (default 1024)")
@@ -133,8 +146,8 @@ def main():
         found_open_ports = scan_ports(str(ip), start_port, end_port, args.timeout, args.delay)
         if found_open_ports:
             print(Fore.GREEN + f"Open ports on {ip} ({len(found_open_ports)}):")
-            for port, service in found_open_ports:
-                print(Fore.GREEN + f" - Port {port} ({service})")
+            for port, service, banner in found_open_ports:
+                print(Fore.GREEN + f" - Port {port} ({service}) - Banner: {banner}")
         else:
             print(Fore.YELLOW + f"No open ports found on {ip}.")
         full_report.append((str(ip), found_open_ports))
@@ -144,17 +157,12 @@ def main():
     print(f"Scan completed in {elapsed:.2f} seconds.")
     print("="*60)
 
-    # Prepare directory for saving results
     folder = "portScanResults"
     os.makedirs(folder, exist_ok=True)
-
-    # Generate timestamped filename
     timestamp = datetime.now().strftime("%y%m%d_%H%M")
     filename = f"PS_Report_{timestamp}.txt"
     filepath = os.path.join(folder, filename)
-    print(Fore.CYAN + f"\nFull scan report will be saved to: {filepath}")
 
-    # Save full scan report automatically
     try:
         with open(filepath, "w") as f:
             f.write(f"PortSaber Scan Report - {datetime.now()}\n")
@@ -162,8 +170,8 @@ def main():
             for ip, ports in full_report:
                 f.write(f"Host: {ip}\n")
                 if ports:
-                    for port, service in ports:
-                        f.write(f"  Port {port} OPEN ({service})\n")
+                    for port, service, banner in ports:
+                        f.write(f"  Port {port} OPEN ({service}) - Banner: {banner}\n")
                 else:
                     f.write("  No open ports found.\n")
                 f.write("\n")
@@ -173,5 +181,11 @@ def main():
 
 if __name__ == "__main__":
     main()
-# This script is a port scanner that scans specified ports on a given IP address or subnet.
-# It uses multithreading for faster scanning and can save the results to a file.
+    try:
+        main()
+    except KeyboardInterrupt:
+        print(Fore.YELLOW + "\nScan interrupted by user. Exiting...")
+        sys.exit()
+    except Exception as e:
+        print(Fore.RED + f"An error occurred: {e}")
+        sys.exit(1)
